@@ -1,12 +1,14 @@
+use std::collections::BTreeSet;
+
 /*
 The problem specification can be found here: https://adventofcode.com/2022/day/1
 */
 fn main() {
     // load the calories file
-    let input = include_str!("calories.txt");
+    let input = include_str!("../calories.txt");
 
-    let mut max = 0; // tracks the max calories found for an elf
     let mut memo: u32 = 0; // used to aggregate calories for an elf
+    let mut set = BTreeSet::<u32>::new();
 
     // iterate the lines in the file, aggregating until an empty line is
     // encountered, at which point we compare memo against max
@@ -30,15 +32,23 @@ fn main() {
         match total {
             None => {} // do nothing
             Some(count) => {
-                // compare the latest total against max, replacing it if greater
-                if count > max {
-                    max = count
-                }
+                set.insert(count);
                 memo = 0;
             }
         }
     }
 
+    let mut pop_count = 0;
+    let mut top_three = 0;
+
+    for entry in set.iter().rev() {
+        top_three += entry;
+        pop_count += 1;
+        if pop_count == 3 {
+            break;
+        }
+    }
+
     // output the max
-    println!("max = {}", max);
+    println!("top 3 = {}", top_three);
 }
