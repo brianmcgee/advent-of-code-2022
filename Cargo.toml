@@ -1,0 +1,25 @@
+[package]
+name = "aoc"
+version = "0.1.0"
+edition = "2021"
+description = "advent of code exercises for 2022"
+license = "MIT"
+authors = ["Brian McGee <brian@bmcgee.ie>"]
+homepage = "https://brianmcgee.github.io/advent-of-code-2022"
+documentation = "https://brianmcgee.github.io/advent-of-code-2022"
+repository = "https://github.com/brianmcgee/advent-of-code-2022"
+readme = "README.md"
+keywords = ["learning"]
+categories = ["advent-of-code"]
+include = ["/Cross.toml", "/LICENSE.md", "/README.md", "/src/**/*"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
+
+[dependencies]
+
+[dev-dependencies]
