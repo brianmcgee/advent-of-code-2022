@@ -20,6 +20,12 @@ lto = true
 codegen-units = 1
 panic = "abort"
 
+[[bin]]
+name = "day-one"
+
+[[bin]]
+name = "day-two"
+
 [dependencies]
 
 [dev-dependencies]
