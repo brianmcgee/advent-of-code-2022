@@ -38,16 +38,7 @@ fn main() {
         }
     }
 
-    let mut pop_count = 0;
-    let mut top_three = 0;
-
-    for entry in set.iter().rev() {
-        top_three += entry;
-        pop_count += 1;
-        if pop_count == 3 {
-            break;
-        }
-    }
+    let top_three: u32 = set.iter().rev().take(3).sum();
 
     // output the max
     println!("top 3 = {}", top_three);
