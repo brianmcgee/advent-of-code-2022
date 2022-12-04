@@ -25,6 +25,10 @@
             name = "advent-of-code-2022";
             packages = with pkgs; [
               # Build tools
+              cargo
+              rustc
+              rustPlatform.rustcSrc
+              gcc
               rustPackages.clippy
               rust-analyzer
 
