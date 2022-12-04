@@ -23,6 +23,34 @@
 
           devShells.default = devshell.mkShell {
             name = "advent-of-code-2022";
+            env = [
+              {
+                # On darwin for example enables finding of libiconv
+                name = "LIBRARY_PATH";
+                # append in case it needs to be modified
+                eval = "$DEVSHELL_DIR/lib";
+              }
+              {
+                      # some *-sys crates require additional includes
+                      name = "CFLAGS";
+                      # append in case it needs to be modified
+                      eval = "\"-I $DEVSHELL_DIR/include ${pkgs.lib.optionalString pkgs.stdenv.isDarwin "-iframework $DEVSHELL_DIR/Library/Frameworks"}\"";
+                    }
+            ]  ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
+                    {
+                      # On darwin for example required for some *-sys crate compilation
+                      name = "RUSTFLAGS";
+                      # append in case it needs to be modified
+                      eval = "\"-L framework=$DEVSHELL_DIR/Library/Frameworks\"";
+                    }
+                    {
+                      # rustdoc uses a different set of flags
+                      name = "RUSTDOCFLAGS";
+                      # append in case it needs to be modified
+                      eval = "\"-L framework=$DEVSHELL_DIR/Library/Frameworks\"";
+                    }
+                  ];
+
             packages = with pkgs; [
               # Build tools
               cargo
