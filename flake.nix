@@ -16,6 +16,7 @@
       perSystem = { system, pkgs, ... }:
         let
           devshell = import inputs.devshell { inherit system; };
+          inherit (pkgs) lib stdenv;
         in
         {
           # This contains a mix of packages, modules, ...
@@ -31,30 +32,31 @@
                 eval = "$DEVSHELL_DIR/lib";
               }
               {
-                      # some *-sys crates require additional includes
-                      name = "CFLAGS";
-                      # append in case it needs to be modified
-                      eval = "\"-I $DEVSHELL_DIR/include ${pkgs.lib.optionalString pkgs.stdenv.isDarwin "-iframework $DEVSHELL_DIR/Library/Frameworks"}\"";
-                    }
-            ]  ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
-                    {
-                      # On darwin for example required for some *-sys crate compilation
-                      name = "RUSTFLAGS";
-                      # append in case it needs to be modified
-                      eval = "\"-L framework=$DEVSHELL_DIR/Library/Frameworks\"";
-                    }
-                    {
-                      # rustdoc uses a different set of flags
-                      name = "RUSTDOCFLAGS";
-                      # append in case it needs to be modified
-                      eval = "\"-L framework=$DEVSHELL_DIR/Library/Frameworks\"";
-                    }
-                  ];
+                # some *-sys crates require additional includes
+                name = "CFLAGS";
+                # append in case it needs to be modified
+                eval = "\"-I $DEVSHELL_DIR/include ${lib.optionalString stdenv.isDarwin "-iframework $DEVSHELL_DIR/Library/Frameworks"}\"";
+              }
+            ] ++ lib.optionals stdenv.isDarwin [
+              {
+                # On darwin for example required for some *-sys crate compilation
+                name = "RUSTFLAGS";
+                # append in case it needs to be modified
+                eval = "\"-L framework=$DEVSHELL_DIR/Library/Frameworks\"";
+              }
+              {
+                # rustdoc uses a different set of flags
+                name = "RUSTDOCFLAGS";
+                # append in case it needs to be modified
+                eval = "\"-L framework=$DEVSHELL_DIR/Library/Frameworks\"";
+              }
+            ];
 
             packages = with pkgs; [
               # Build tools
               cargo
               rustc
+              clippy
               rustPlatform.rustcSrc
               gcc
               rustPackages.clippy
@@ -67,7 +69,7 @@
               rustPackages.rustfmt
               shellcheck
               shfmt
-            ];
+            ] ++ lib.optionals stdenv.isDarwin [ libiconv ];
           };
 
           # In Nix 2.8 you can run `nix fmt` to format this whole repo.
