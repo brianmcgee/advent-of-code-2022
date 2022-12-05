@@ -30,10 +30,5 @@ fn main() {
     // load the calories file
     let input = include_str!("../input.txt");
 
-    for line in input.lines() {
-        match line.split(" ").collect() {
-            [a, b] => (a, b),
-            _ => println!("malformed line: {}", line),
-        }
-    }
+    Parser::parse(input.lines());
 }
