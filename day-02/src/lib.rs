@@ -1,5 +1,7 @@
+use std::fmt::format;
 use lazy_static::lazy_static;
 use regex::Regex;
+use crate::Action::Paper;
 
 #[derive(Debug, PartialEq, Eq)]
 enum Action {
@@ -30,36 +32,35 @@ struct Round {
 }
 
 impl Round {
-    fn parse(str: &str) -> Round {
+    fn parse(str: &str) -> Result<Round, String> {
         lazy_static! {
             static ref RE: Regex =
                 Regex::new(r"^([A-C]) ([X-Z])$").expect("failed to compile regex");
         }
-        RE
-            .captures_iter(str)
-            .take(1)
-            .map(|captures| {
-                let opp_action = captures
-                    .get(1)
-                    .map(|m| m.as_str())
-                    .map(|str| Action::parse(str))
-                    .expect("failed to parse opponent action")
-                    .unwrap();
+        let regex = Regex::new(r"^([A-C]) ([X-Z])$").expect("failed to compile regex");
 
-                let my_action = captures
-                    .get(2)
-                    .map(|m| m.as_str())
-                    .map(|str| Action::parse(str))
-                    .expect("failed to parse my action")
-                    .unwrap();
+        regex
+            .captures(str)
+            .take()
+            .ok_or(format!("malformed str: {}", str))
+            .and_then(|captures| {
 
-                Round {
-                    opp_action,
-                    my_action,
+                let actions: Vec<Result<Action, String>> = captures.iter()
+                    // first match is always the entire string
+                    .skip(1)
+                    .map(|match_opt| match_opt
+                        .ok_or(format!("opponent action not found: {}", str))
+                        .and_then(|m| Action::parse(m.as_str()))
+                    )
+                    .collect();
+
+
+                match (actions.get(0), actions.get(1)) {
+                    (Some(a), Some(b)) => Ok(Round { opp_action: a, my_action: b }),
+                    (None, _) => Err(format!("opponent action not found")),
+                    (_, None) => Err(format!("my action not found")),
                 }
             })
-            .nth(0)
-            .expect("no round could be parsed")
     }
 }
 
@@ -121,14 +122,20 @@ mod tests {
 
     #[test]
     fn round_parse() {
-        assert_eq!(Round::parse("A X"), Round {
-            opp_action: Action::Rock,
-            my_action: Action::Rock
-        });
+        assert_eq!(
+            Round::parse("A X"),
+            Round {
+                opp_action: Action::Rock,
+                my_action: Action::Rock
+            }
+        );
 
-        assert_eq!(Round::parse("A Y"), Round {
-            opp_action: Action::Rock,
-            my_action: Action::Paper
-        });
+        assert_eq!(
+            Round::parse("A Y"),
+            Round {
+                opp_action: Action::Rock,
+                my_action: Action::Paper
+            }
+        );
     }
 }
